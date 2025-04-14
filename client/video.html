@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>Ciberpunk Chat</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="videostyle.css" rel="stylesheet">
+</head>
+
+<body>
+  <!-- Spinner -->
+  <div class="modal">
+    <span id="spinner">Waiting For Someone...</span>
+  </div>
+
+  <!-- Video Holder -->
+  <div class="video-holder">
+    <video autoplay id="my-video"></video>
+    <video autoplay id="video"></video>
+  </div>
+
+  <!-- Chat Holder -->
+  <div class="chat-holder">
+    <div class="messages">
+      <div class="wrapper"></div>
+      <!-- Typing Indicator -->
+      <div id="typingIndicator" style="display: none;">Stranger is typing...</div>
+    </div>
+    <div class="input">
+      <div class="input-container">
+        <input type="text" placeholder="Type your message here.." />
+        <button id="send">Send</button>
+      </div>
+    </div>
+  </div>
+  <script src="./index.js" type="module"></script>
+</body>
+
+</html>
