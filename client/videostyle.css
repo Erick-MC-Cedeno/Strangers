@@ -11,29 +11,28 @@ body {
   background-color: #000;
   color: #FFFF00;
   display: grid;
-  grid-template-columns: 3fr 1fr;
-  gap: 30px;
+  grid-template-columns: 2fr 1fr;
+  gap: 20px;
   height: 100vh;
   overflow: hidden;
+  padding: 20px;
 }
 
 /* Video Holder */
 .video-holder {
   position: relative;
-  padding: 20px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  height: 95vh;
+  align-self: start;
   background-color: #111;
   border: 2px solid #FFFF00;
   border-radius: 20px;
+  overflow: hidden;
 }
 
 #video {
   width: 100%;
-  height: calc(100vh - 80px);
+  height: 100%;
   background-color: #000;
-  border-radius: 20px;
   object-fit: cover;
 }
 
@@ -49,17 +48,18 @@ body {
   object-fit: cover;
   border: 3px solid #FFFF00;
   overflow: hidden;
+  box-shadow: 0 0 15px rgba(255, 255, 0, 0.3);
 }
 
 /* Chat Holder */
 .chat-holder {
-  display: flex;
-  flex-direction: column;
-  height: calc(100vh - 40px);
+  height: 95vh;
+  margin-left: 20px;
   border: 2px solid #FFFF00;
   border-radius: 20px;
   background-color: #111;
-  position: relative;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Messages container (scrollable) */
@@ -79,12 +79,13 @@ body {
   margin-bottom: 15px;
   color: #FFFF00;
   font-size: 14px;
+  line-height: 1.4;
 }
 
 /* Fixed Input Area */
 .chat-holder .input {
   background-color: #222;
-  padding: 10px 15px;
+  padding: 15px 20px;
   border-top: 1px solid #FFFF00;
 }
 
@@ -98,7 +99,7 @@ body {
 /* Input Field */
 .chat-holder .input input {
   flex: 1;
-  padding: 8px 10px;
+  padding: 10px 15px;
   border: none;
   border-radius: 15px;
   font-size: 14px;
@@ -114,11 +115,16 @@ body {
   color: #000;
   font-size: 14px;
   font-weight: bold;
-  padding: 8px 12px;
+  padding: 10px 20px;
   border: none;
   border-radius: 10px;
   cursor: pointer;
-  outline: 2px solid #FFFF00;
+  transition: all 0.3s ease;
+}
+
+.chat-holder .input button:hover {
+  background-color: #FFEE00;
+  transform: scale(1.05);
 }
 
 /* Modal (spinner) */
@@ -158,26 +164,30 @@ body {
   body {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 15px;
+    padding: 10px;
   }
+  
   .video-holder {
     height: 60vh;
-    margin: 10px;
+    width: 100%;
+    margin: 0;
   }
-  #video {
-    height: 100%;
-  }
+  
   #my-video {
     width: 120px;
     height: 120px;
     bottom: 10px;
     right: 10px;
   }
+  
   .chat-holder {
     height: 35vh;
-    margin: 10px;
+    width: 100%;
+    margin-left: 0;
   }
+  
   .chat-holder .input {
-    padding: 8px 10px;
+    padding: 10px 15px;
   }
 }
