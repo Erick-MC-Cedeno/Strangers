@@ -19,7 +19,7 @@ let type = null;
 let roomid = null;
 let socket = null;
 
-// Función de inicialización principal
+// Inicializar la aplicación
 async function init() {
   socket = io('http://localhost:8000');
   setupSocketEvents();
@@ -46,7 +46,7 @@ function fullCleanup() {
   chatWrapper.innerHTML = '';
 }
 
-// Inicializar medios
+// Inicializar cámara/micrófono
 async function initMedia() {
   try {
     localStream = await navigator.mediaDevices.getUserMedia({
@@ -54,13 +54,13 @@ async function initMedia() {
       video: true
     });
     myVideo.srcObject = localStream;
-  } catch (error) {
-    console.error('Error accessing media devices:', error);
-    alert('Could not access your camera/microphone. Please refresh and allow permissions.');
+  } catch (err) {
+    console.error('Error accessing media devices:', err);
+    alert('No se pudo acceder a tu cámara/micrófono.');
   }
 }
 
-// Configurar WebRTC
+// Configurar la conexión WebRTC
 function setupPeerConnection() {
   peer = new RTCPeerConnection({
     iceServers: [
@@ -77,7 +77,7 @@ function setupPeerConnection() {
 
   peer.ontrack = (e) => {
     strangerVideo.srcObject = e.streams[0];
-    strangerVideo.play().catch(e => console.error('Error playing video:', e));
+    strangerVideo.play().catch(e => console.error('Error al reproducir video:', e));
   };
 
   if (localStream) {
@@ -87,7 +87,7 @@ function setupPeerConnection() {
   }
 }
 
-// Reiniciar conexión al hacer clic en "Next"
+// Reiniciar conexión
 function restartConnection() {
   remoteSocket = null;
   roomid = null;
@@ -103,10 +103,10 @@ function restartConnection() {
   }, 300);
 }
 
-// Configurar eventos del socket
+// Configuración de eventos del socket
 function setupSocketEvents() {
   socket.on('connect', () => {
-    console.log('Connected to server');
+    console.log('Conectado al servidor');
     socket.emit('start', (personType) => {
       type = personType;
     });
@@ -114,6 +114,11 @@ function setupSocketEvents() {
 
   socket.on('start', (personType) => {
     type = personType;
+  });
+
+  socket.on('roomid', (id) => {
+    roomid = id;
+    console.log('Room ID:', roomid);
   });
 
   socket.on('remote-socket', (partnerId) => {
@@ -126,14 +131,9 @@ function setupSocketEvents() {
     }
   });
 
-  socket.on('roomid', (id) => {
-    roomid = id;
-    console.log('Room ID:', roomid);
-  });
-
   socket.on('disconnected', () => {
     fullCleanup();
-    alert('Partner disconnected. Searching for new connection...');
+    alert('Tu pareja se desconectó. Buscando una nueva...');
     restartConnection();
   });
 
@@ -152,8 +152,8 @@ function setupSocketEvents() {
         await peer.setLocalDescription(answer);
         socket.emit('sdp:send', { sdp: peer.localDescription });
       }
-    } catch (error) {
-      console.error('SDP handling failed:', error);
+    } catch (err) {
+      console.error('Error procesando SDP:', err);
     }
   });
 
@@ -162,8 +162,8 @@ function setupSocketEvents() {
 
     try {
       await peer.addIceCandidate(new RTCIceCandidate(candidate));
-    } catch (error) {
-      console.error('ICE candidate error:', error);
+    } catch (err) {
+      console.error('Error agregando ICE:', err);
     }
   });
 
@@ -181,9 +181,16 @@ function setupSocketEvents() {
     `;
     chatWrapper.scrollTop = chatWrapper.scrollHeight;
   });
+
+  // Verificar estado de la sala
+  socket.on('check-room-status', (status) => {
+    if (status === 'not_ready') {
+      alert('Debe haber dos personas en la sala para proceder.');
+    }
+  });
 }
 
-// Configurar eventos de UI
+// Eventos de interfaz
 function setupUIEvents() {
   exitBtn.addEventListener('click', () => {
     fullCleanup();
@@ -192,8 +199,15 @@ function setupUIEvents() {
   });
 
   nextBtn.addEventListener('click', () => {
-    fullCleanup();
-    restartConnection();
+    // Antes de proceder, verificar que haya dos personas en la sala
+    socket.emit('check-room-status', roomid, (status) => {
+      if (status === 'ready') {
+        fullCleanup();
+        restartConnection();
+      } else {
+        alert('Debe haber dos personas en la sala para proceder.');
+      }
+    });
   });
 
   const sendMessage = () => {
@@ -242,7 +256,7 @@ function setupUIEvents() {
   });
 }
 
-// Crear oferta WebRTC
+// Crear oferta
 async function createOffer() {
   if (!peer) return;
 
@@ -253,10 +267,9 @@ async function createOffer() {
     });
     await peer.setLocalDescription(offer);
     socket.emit('sdp:send', { sdp: peer.localDescription });
-  } catch (error) {
-    console.error('Offer creation failed:', error);
+  } catch (err) {
+    console.error('Error creando la oferta:', err);
   }
 }
 
-// Inicializar la aplicación
 init();
