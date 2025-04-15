@@ -293,7 +293,7 @@ body {
   100% { top: 100%; }
 }
 
-/* Responsive adjustments */
+
 @media only screen and (max-width: 1000px) {
   body {
     display: flex;
@@ -322,13 +322,13 @@ body {
   }
 
   .controls {
-    bottom: 6vh; /* Adjusted slightly for better spacing */
-    left: 50%; /* Centered horizontally */
-    transform: translateX(-50%); /* Ensure proper centering */
-    gap: 4vw; /* Adjusted gap for smaller screens */
+    bottom: 6vh; 
+    left: 50%; 
+    transform: translateX(-50%); 
+    gap: 4vw; 
     width: 90%;
     max-width: none;
-    justify-content: center; /* Centered the buttons */
+    justify-content: center; 
   }
 
   .cyber-button {
