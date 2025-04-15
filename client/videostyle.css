@@ -51,6 +51,97 @@ body {
   box-shadow: 0 0 15px rgba(255, 255, 0, 0.3);
 }
 
+/* Controls */
+.controls {
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 25px;
+  z-index: 1000;
+}
+
+/* Cyber Button Styles */
+.cyber-button {
+  padding: 15px 35px;
+  border: 3px solid #FFFF00;
+  background: #000;
+  color: #FFFF00;
+  font-family: 'Courier New', monospace;
+  font-weight: 700;
+  text-transform: uppercase;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s ease;
+  border-radius: 8px;
+  text-shadow: 0 0 10px #FFFF00;
+  box-shadow: 0 0 15px rgba(255, 255, 0, 0.3);
+}
+
+.cyber-button::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    45deg,
+    transparent 35%,
+    rgba(255, 255, 0, 0.2) 50%,
+    transparent 65%
+  );
+  animation: scan 3s infinite linear;
+  mix-blend-mode: overlay;
+}
+
+.cyber-button::after {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  border-radius: 5px;
+  background: rgba(0, 0, 0, 0.8);
+}
+
+.cyber-button:hover {
+  background: #FFFF00;
+  color: #000;
+  box-shadow: 0 0 30px #FFFF00;
+  transform: scale(1.05);
+  text-shadow: none;
+}
+
+.cyber-button .glitch-text {
+  position: relative;
+  z-index: 1;
+  animation: glitch 2s infinite;
+}
+
+/* Exit Button Styles */
+.cyber-button.exit {
+  border-color: #ff0000;
+  color: #ff0000;
+  text-shadow: 0 0 10px #ff0000;
+  box-shadow: 0 0 15px rgba(255, 0, 0, 0.3);
+}
+
+.cyber-button.exit::before {
+  background: linear-gradient(
+    45deg,
+    transparent 35%,
+    rgba(255, 0, 0, 0.2) 50%,
+    transparent 65%
+  );
+}
+
+.cyber-button.exit:hover {
+  background: #ff0000;
+  color: #000;
+  box-shadow: 0 0 30px #ff0000;
+}
+
 /* Chat Holder */
 .chat-holder {
   height: 95vh;
@@ -153,13 +244,50 @@ body {
   animation: pulse 1.5s ease-in-out infinite;
 }
 
+/* Animations */
 @keyframes pulse {
   0% { opacity: 1; transform: scale(1); }
   50% { opacity: 0.5; transform: scale(0.9); }
   100% { opacity: 1; transform: scale(1); }
 }
 
-/* Responsive adjustments for smaller screens */
+@keyframes scan {
+  0% { transform: translate(-30%, -30%) rotate(45deg); }
+  100% { transform: translate(30%, 30%) rotate(45deg); }
+}
+
+@keyframes glitch {
+  0% {
+    text-shadow: 2px 2px 0 #ff0000, -2px -2px 0 #00ffff;
+  }
+  25% {
+    text-shadow: -2px 2px 0 #ff0000, 2px -2px 0 #00ffff;
+  }
+  50% {
+    text-shadow: 2px -2px 0 #ff0000, -2px 2px 0 #00ffff;
+  }
+  75% {
+    text-shadow: -2px -2px 0 #ff0000, 2px 2px 0 #00ffff;
+  }
+  100% {
+    text-shadow: 2px 2px 0 #ff0000, -2px -2px 0 #00ffff;
+  }
+}
+
+.scanline {
+  position: absolute;
+  width: 100%;
+  height: 2px;
+  background: rgba(0, 255, 255, 0.3);
+  animation: scanline 3s linear infinite;
+}
+
+@keyframes scanline {
+  0% { top: -100%; }
+  100% { top: 100%; }
+}
+
+/* Responsive adjustments */
 @media only screen and (max-width: 1000px) {
   body {
     display: flex;
@@ -185,6 +313,17 @@ body {
     height: 35vh;
     width: 100%;
     margin-left: 0;
+  }
+  
+  .controls {
+    bottom: 20px;
+    gap: 15px;
+  }
+  
+  .cyber-button {
+    padding: 12px 25px;
+    font-size: 0.8em;
+    border-width: 2px;
   }
   
   .chat-holder .input {

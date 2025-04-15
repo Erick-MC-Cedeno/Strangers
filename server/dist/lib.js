@@ -34,13 +34,6 @@ function handelStart(roomArr, socket, cb, io) {
         cb('p1');
         socket.emit('roomid', roomid);
     }
-    /**
-     *
-     * @param roomid
-     * @desc search though roomArr and
-     * make isAvailable false, also se p2.id
-     * socket.id
-     */
     function closeRoom(roomid) {
         for (let i = 0; i < roomArr.length; i++) {
             if (roomArr[i].roomid == roomid) {
@@ -50,13 +43,6 @@ function handelStart(roomArr, socket, cb, io) {
             }
         }
     }
-    /**
-     *
-     * @returns Object {is, roomid, room}
-     * is -> true if foom is available
-     * roomid -> id of the room, could be empth
-     * room -> the roomArray, could be empty
-     */
     function checkAvailableRoom() {
         for (let i = 0; i < roomArr.length; i++) {
             if (roomArr[i].isAvailable) {
@@ -69,35 +55,50 @@ function handelStart(roomArr, socket, cb, io) {
         return { is: false, roomid: '', room: null };
     }
 }
-/**
- * @desc handels disconnceition event
- */
 function handelDisconnect(disconnectedId, roomArr, io) {
+    var _a, _b, _c, _d;
+    // Nueva lógica para manejar reconexiones limpias
+    const cleanRooms = [];
     for (let i = 0; i < roomArr.length; i++) {
-        if (roomArr[i].p1.id == disconnectedId) {
-            io.to(roomArr[i].p2.id).emit("disconnected");
-            if (roomArr[i].p2.id) {
-                roomArr[i].isAvailable = true;
-                roomArr[i].p1.id = roomArr[i].p2.id;
-                roomArr[i].p2.id = null;
+        const room = roomArr[i];
+        // Para el botón Exit
+        if (room.p1.id === disconnectedId || room.p2.id === disconnectedId) {
+            // Notificar al compañero
+            const partner = room.p1.id === disconnectedId ? (_a = room.p2) === null || _a === void 0 ? void 0 : _a.id : (_b = room.p1) === null || _b === void 0 ? void 0 : _b.id;
+            if (partner)
+                io.to(partner).emit('disconnected');
+            // Para el botón Next: Marcar la sala como disponible nuevamente
+            if (room.p1.id === disconnectedId && ((_c = room.p2) === null || _c === void 0 ? void 0 : _c.id)) {
+                cleanRooms.push({
+                    roomid: room.roomid,
+                    isAvailable: true,
+                    p1: { id: room.p2.id },
+                    p2: { id: null }
+                });
             }
-            else {
-                roomArr.splice(i, 1);
+            else if (((_d = room.p2) === null || _d === void 0 ? void 0 : _d.id) === disconnectedId) {
+                cleanRooms.push({
+                    roomid: room.roomid,
+                    isAvailable: true,
+                    p1: { id: room.p1.id },
+                    p2: { id: null }
+                });
             }
         }
-        else if (roomArr[i].p2.id == disconnectedId) {
-            io.to(roomArr[i].p1.id).emit("disconnected");
-            if (roomArr[i].p1.id) {
-                roomArr[i].isAvailable = true;
-                roomArr[i].p2.id = null;
-            }
-            else {
-                roomArr.splice(i, 1);
-            }
+        else {
+            cleanRooms.push(room);
         }
     }
+    // Actualizar el array de rooms
+    roomArr.length = 0;
+    roomArr.push(...cleanRooms.filter(room => {
+        var _a;
+        if (room.p1.id === disconnectedId && !((_a = room.p2) === null || _a === void 0 ? void 0 : _a.id))
+            return false;
+        return true;
+    }));
 }
-// get type of person (p1 or p2)
+// get type of person (p1 or p2) - Sin cambios
 function getType(id, roomArr) {
     for (let i = 0; i < roomArr.length; i++) {
         if (roomArr[i].p1.id == id) {

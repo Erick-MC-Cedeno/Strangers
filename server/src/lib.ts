@@ -33,16 +33,6 @@ export function handelStart(roomArr: Array<room>, socket: any, cb: Function, io:
     socket.emit('roomid', roomid);
   }
 
-
-
-
-  /**
-   * 
-   * @param roomid 
-   * @desc search though roomArr and 
-   * make isAvailable false, also se p2.id 
-   * socket.id
-   */
   function closeRoom(roomid: string): void {
     for (let i = 0; i < roomArr.length; i++) {
       if (roomArr[i].roomid == roomid) {
@@ -53,14 +43,6 @@ export function handelStart(roomArr: Array<room>, socket: any, cb: Function, io:
     }
   }
 
-
-  /**
-   * 
-   * @returns Object {is, roomid, room}
-   * is -> true if foom is available
-   * roomid -> id of the room, could be empth
-   * room -> the roomArray, could be empty 
-   */
   function checkAvailableRoom(): { is: boolean, roomid: string, room: room | null } {
     for (let i = 0; i < roomArr.length; i++) {
       if (roomArr[i].isAvailable) {
@@ -70,41 +52,53 @@ export function handelStart(roomArr: Array<room>, socket: any, cb: Function, io:
         return { is: false, roomid: "", room: null };
       }
     }
-
     return { is: false, roomid: '', room: null };
   }
 }
 
-/**
- * @desc handels disconnceition event
- */
 export function handelDisconnect(disconnectedId: string, roomArr: Array<room>, io: any) {
+  // Nueva lógica para manejar reconexiones limpias
+  const cleanRooms = [];
+  
   for (let i = 0; i < roomArr.length; i++) {
-    if (roomArr[i].p1.id == disconnectedId) {
-      io.to(roomArr[i].p2.id).emit("disconnected");
-      if (roomArr[i].p2.id) {
-        roomArr[i].isAvailable = true;
-        roomArr[i].p1.id = roomArr[i].p2.id;
-        roomArr[i].p2.id = null;
+    const room = roomArr[i];
+    
+    // Para el botón Exit
+    if (room.p1.id === disconnectedId || room.p2.id === disconnectedId) {
+      // Notificar al compañero
+      const partner = room.p1.id === disconnectedId ? room.p2?.id : room.p1?.id;
+      if (partner) io.to(partner).emit('disconnected');
+      
+      // Para el botón Next: Marcar la sala como disponible nuevamente
+      if (room.p1.id === disconnectedId && room.p2?.id) {
+        cleanRooms.push({
+          roomid: room.roomid,
+          isAvailable: true,
+          p1: { id: room.p2.id },
+          p2: { id: null }
+        });
+      } else if (room.p2?.id === disconnectedId) {
+        cleanRooms.push({
+          roomid: room.roomid,
+          isAvailable: true,
+          p1: { id: room.p1.id },
+          p2: { id: null }
+        });
       }
-      else {
-        roomArr.splice(i, 1);
-      }
-    } else if (roomArr[i].p2.id == disconnectedId) {
-      io.to(roomArr[i].p1.id).emit("disconnected");
-      if (roomArr[i].p1.id) {
-        roomArr[i].isAvailable = true;
-        roomArr[i].p2.id = null;
-      }
-      else {
-        roomArr.splice(i, 1);
-      }
+    } else {
+      cleanRooms.push(room);
     }
   }
+
+  // Actualizar el array de rooms
+  roomArr.length = 0;
+  roomArr.push(...cleanRooms.filter(room => {
+    if (room.p1.id === disconnectedId && !room.p2?.id) return false;
+    return true;
+  }));
 }
 
-
-// get type of person (p1 or p2)
+// get type of person (p1 or p2) - Sin cambios
 export function getType(id: string, roomArr: Array<room>): GetTypesResult {
   for (let i = 0; i < roomArr.length; i++) {
     if (roomArr[i].p1.id == id) {
@@ -113,6 +107,5 @@ export function getType(id: string, roomArr: Array<room>): GetTypesResult {
       return { type: 'p2', p1id: roomArr[i].p1.id };
     }
   }
-
   return false;
 }

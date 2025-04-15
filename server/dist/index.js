@@ -4,69 +4,134 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
-const app = (0, express_1.default)();
 const cors_1 = __importDefault(require("cors"));
-app.use((0, cors_1.default)());
 const socket_io_1 = require("socket.io");
-const server = app.listen('8000', () => console.log('Server is up, 8000'));
-const io = new socket_io_1.Server(server, { cors: { origin: '*' } });
 const lib_1 = require("./lib");
+const app = (0, express_1.default)();
+app.use((0, cors_1.default)());
+const server = app.listen(8000, () => console.log('Server is up, 8000'));
+const io = new socket_io_1.Server(server, {
+    cors: {
+        origin: '*',
+        methods: ['GET', 'POST']
+    },
+    pingTimeout: 10000,
+    pingInterval: 5000
+});
 let online = 0;
-let roomArr = []; // Explicit type declaration
+let roomArr = [];
 io.on('connection', (socket) => {
     online++;
     io.emit('online', online);
-    // on start
-    socket.on('start', cb => {
-        (0, lib_1.handelStart)(roomArr, socket, cb, io);
+    // Manejador para 'start'
+    socket.on('start', (cb) => {
+        try {
+            if (typeof cb === 'function') {
+                (0, lib_1.handelStart)(roomArr, socket, cb, io);
+            }
+            else {
+                console.warn('Client emitted start without callback');
+                // Emitimos un mensaje de error específico al cliente
+                socket.emit('error', { message: 'Missing callback for start event' });
+            }
+        }
+        catch (error) {
+            console.error('Error in start handler:', error);
+        }
     });
-    // On disconnection
+    // Manejador para 'disconnect'
     socket.on('disconnect', () => {
         online--;
         io.emit('online', online);
-        (0, lib_1.handelDisconnect)(socket.id, roomArr, io);
+        try {
+            (0, lib_1.handelDisconnect)(socket.id, roomArr, io);
+        }
+        catch (error) {
+            console.error('Error in disconnect handler:', error);
+        }
     });
-    /// ------- logic for webrtc connection ------
-    // on ice send
+    // Manejador para 'disconnect-me'
+    socket.on('disconnect-me', () => {
+        try {
+            (0, lib_1.handelDisconnect)(socket.id, roomArr, io);
+            online--;
+            io.emit('online', online);
+        }
+        catch (error) {
+            console.error('Error in disconnect-me handler:', error);
+        }
+    });
+    // Manejador para 'next'
+    socket.on('next', () => {
+        try {
+            (0, lib_1.handelDisconnect)(socket.id, roomArr, io);
+            (0, lib_1.handelStart)(roomArr, socket, (person) => {
+                if (socket.connected) {
+                    socket.emit('start', person);
+                }
+                else {
+                    console.warn('Socket not connected, cannot emit start');
+                }
+            }, io);
+        }
+        catch (error) {
+            console.error('Error in next handler:', error);
+        }
+    });
+    // ICE candidate
     socket.on('ice:send', ({ candidate }) => {
-        let type = (0, lib_1.getType)(socket.id, roomArr);
-        if (type) {
-            if ((type === null || type === void 0 ? void 0 : type.type) == 'p1') {
-                typeof (type === null || type === void 0 ? void 0 : type.p2id) == 'string' &&
-                    io.to(type.p2id).emit('ice:reply', { candidate, from: socket.id });
-            }
-            else if ((type === null || type === void 0 ? void 0 : type.type) == 'p2') {
-                typeof (type === null || type === void 0 ? void 0 : type.p1id) == 'string' &&
-                    io.to(type.p1id).emit('ice:reply', { candidate, from: socket.id });
+        try {
+            const type = (0, lib_1.getType)(socket.id, roomArr);
+            if (type && 'type' in type) {
+                const target = type.type === 'p1' ? type.p2id : type.p1id;
+                if (target)
+                    io.to(target).emit('ice:reply', { candidate, from: socket.id });
             }
         }
+        catch (error) {
+            console.error('Error in ice:send handler:', error);
+        }
     });
-    // on sdp send
+    // SDP offer/answer
     socket.on('sdp:send', ({ sdp }) => {
-        let type = (0, lib_1.getType)(socket.id, roomArr);
-        if (type) {
-            if ((type === null || type === void 0 ? void 0 : type.type) == 'p1') {
-                typeof (type === null || type === void 0 ? void 0 : type.p2id) == 'string' &&
-                    io.to(type.p2id).emit('sdp:reply', { sdp, from: socket.id });
-            }
-            if ((type === null || type === void 0 ? void 0 : type.type) == 'p2') {
-                typeof (type === null || type === void 0 ? void 0 : type.p1id) == 'string' &&
-                    io.to(type.p1id).emit('sdp:reply', { sdp, from: socket.id });
+        try {
+            const type = (0, lib_1.getType)(socket.id, roomArr);
+            if (type && 'type' in type) {
+                const target = type.type === 'p1' ? type.p2id : type.p1id;
+                if (target)
+                    io.to(target).emit('sdp:reply', { sdp, from: socket.id });
             }
         }
+        catch (error) {
+            console.error('Error in sdp:send handler:', error);
+        }
     });
-    /// --------- Messages -----------
-    // send message
-    socket.on('send-message', (input, type, roomid) => {
-        if (type == 'p1')
-            type = 'You: ';
-        else if (type == 'p2')
-            type = 'Stranger: ';
-        socket.to(roomid).emit('get-message', input, type);
+    // Chat
+    socket.on('send-message', (input, userType, roomid) => {
+        try {
+            if (typeof input === 'string' && typeof roomid === 'string') {
+                const prefix = userType === 'p1' ? 'You: ' : 'Stranger: ';
+                socket.to(roomid).emit('get-message', input, prefix);
+            }
+        }
+        catch (error) {
+            console.error('Error in send-message handler:', error);
+        }
     });
-    // is typing functionality
+    // Typing
     socket.on('typing', ({ roomid, isTyping }) => {
-        // Emit the typing status to everyone in the room (except the sender)
-        socket.to(roomid).emit('typing', isTyping);
+        try {
+            if (typeof roomid === 'string') {
+                socket.to(roomid).emit('typing', isTyping);
+            }
+        }
+        catch (error) {
+            console.error('Error in typing handler:', error);
+        }
+    });
+    // Reconnect
+    socket.on('reconnect', (attemptNumber) => {
+        console.log(`Client reconnected after ${attemptNumber} attempts`);
+        socket.emit('reconnected');
     });
 });
