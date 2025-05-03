@@ -44,6 +44,10 @@ function fullCleanup() {
 
   spinner.style.display = 'flex';
   chatWrapper.innerHTML = '';
+  
+  // Reiniciar el estado de la conexión
+  remoteSocket = null;
+  roomid = null;
 }
 
 // Inicializar cámara/micrófono
@@ -97,8 +101,11 @@ function restartConnection() {
 
   setTimeout(() => {
     spinner.style.display = 'flex';
-    socket.emit('start', (newType) => {
-      type = newType;
+    // Reiniciar la cámara antes de buscar una nueva sala
+    initMedia().then(() => {
+      socket.emit('start', (newType) => {
+        type = newType;
+      });
     });
   }, 300);
 }
@@ -124,11 +131,18 @@ function setupSocketEvents() {
   socket.on('remote-socket', (partnerId) => {
     remoteSocket = partnerId;
     spinner.style.display = 'none';
-    setupPeerConnection();
+    
+    // Asegurar que la cámara esté inicializada antes de configurar la conexión peer
+    initMedia().then(() => {
+      setupPeerConnection();
 
-    if (type === 'p1') {
-      createOffer();
-    }
+      if (type === 'p1') {
+        createOffer();
+      }
+    }).catch(err => {
+      console.error('Error reiniciando la cámara:', err);
+      alert('No se pudo acceder a tu cámara/micrófono. Por favor, verifica los permisos.');
+    });
   });
 
   socket.on('disconnected', () => {
