@@ -19,7 +19,7 @@ let type = null;
 let roomid = null;
 let socket = null;
 
-// Inicializar la aplicación
+// Inicializar la aplicación:  usa tu url de uso o localhost:8000
 async function init() {
   socket = io('https://zany-potato-x795wpw9x4gf6gg5-8000.app.github.dev/');
   setupSocketEvents();
