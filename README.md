@@ -1,6 +1,6 @@
 # Strangers
 
-[logo]:(../pulic/black%20yellow%20minimalist%20Idea%20Logo.gif)
+![strangers-logo](./client//public/black%20yellow%20minimalist%20Idea%20Logo.gif)
 
 Este proyecto utiliza las siguientes tecnologías:
 
