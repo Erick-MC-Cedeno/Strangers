@@ -21,7 +21,7 @@ let socket = null;
 
 // Inicializar la aplicación
 async function init() {
-  socket = io('http://localhost:8000');
+  socket = io('https://zany-potato-x795wpw9x4gf6gg5-8000.app.github.dev/');
   setupSocketEvents();
   await initMedia();
   setupUIEvents();
@@ -44,10 +44,6 @@ function fullCleanup() {
 
   spinner.style.display = 'flex';
   chatWrapper.innerHTML = '';
-  
-  // Reiniciar el estado de la conexión
-  remoteSocket = null;
-  roomid = null;
 }
 
 // Inicializar cámara/micrófono
@@ -106,6 +102,12 @@ function restartConnection() {
       socket.emit('start', (newType) => {
         type = newType;
       });
+    }).catch(err => {
+      console.error('Error reiniciando la cámara:', err);
+      // Intentar conectar de todos modos
+      socket.emit('start', (newType) => {
+        type = newType;
+      });
     });
   }, 300);
 }
@@ -132,22 +134,26 @@ function setupSocketEvents() {
     remoteSocket = partnerId;
     spinner.style.display = 'none';
     
-    // Asegurar que la cámara esté inicializada antes de configurar la conexión peer
-    initMedia().then(() => {
+    // Asegurar que la cámara esté activa antes de configurar la conexión
+    if (!localStream) {
+      initMedia().then(() => {
+        setupPeerConnection();
+        if (type === 'p1') {
+          createOffer();
+        }
+      });
+    } else {
       setupPeerConnection();
-
       if (type === 'p1') {
         createOffer();
       }
-    }).catch(err => {
-      console.error('Error reiniciando la cámara:', err);
-      alert('No se pudo acceder a tu cámara/micrófono. Por favor, verifica los permisos.');
-    });
+    }
   });
 
   socket.on('disconnected', () => {
+    // Reemplazar el alert con una notificación no bloqueante
+    showNotification('Tu pareja se desconectó. Buscando una nueva...');
     fullCleanup();
-    alert('Tu pareja se desconectó. Buscando una nueva...');
     restartConnection();
   });
 
@@ -213,15 +219,9 @@ function setupUIEvents() {
   });
 
   nextBtn.addEventListener('click', () => {
-    // Antes de proceder, verificar que haya dos personas en la sala
-    socket.emit('check-room-status', roomid, (status) => {
-      if (status === 'ready') {
-        fullCleanup();
-        restartConnection();
-      } else {
-        alert('Debe haber dos personas en la sala para proceder.');
-      }
-    });
+    // Cambiar directamente sin verificar el estado de la sala
+    fullCleanup();
+    restartConnection();
   });
 
   const sendMessage = () => {
@@ -284,6 +284,35 @@ async function createOffer() {
   } catch (err) {
     console.error('Error creando la oferta:', err);
   }
+}
+
+// Función para mostrar notificaciones no bloqueantes
+function showNotification(message) {
+  // Crear elemento de notificación
+  const notification = document.createElement('div');
+  notification.className = 'notification';
+  notification.textContent = message;
+  notification.style.position = 'fixed';
+  notification.style.top = '20px';
+  notification.style.left = '50%';
+  notification.style.transform = 'translateX(-50%)';
+  notification.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+  notification.style.color = 'white';
+  notification.style.padding = '10px 20px';
+  notification.style.borderRadius = '5px';
+  notification.style.zIndex = '9999';
+  
+  // Añadir al DOM
+  document.body.appendChild(notification);
+  
+  // Eliminar después de 3 segundos
+  setTimeout(() => {
+    notification.style.opacity = '0';
+    notification.style.transition = 'opacity 0.5s';
+    setTimeout(() => {
+      document.body.removeChild(notification);
+    }, 500);
+  }, 3000);
 }
 
 init();
