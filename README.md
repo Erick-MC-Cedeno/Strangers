@@ -32,13 +32,5 @@ npm start
 ```
 
 
-![Inicio](/client//public//CAPTURAS//INICIO.png
+![Inicio](/client//public//CAPTURAS//INICIO.png)
 ![Video](/client//public//CAPTURAS/VIDEO.png)
-)
-
-
-
-![Screenshot 1](frontend/src/assets/screenshots/Login.png)
-![Screenshot 2](frontend/src/assets/screenshots/SignUp.png)
-![Screenshot 3](frontend/src/assets/screenshots/Chat-sk.png)
-![Screenshot 4](frontend/src/assets/screenshots/Chat.png
