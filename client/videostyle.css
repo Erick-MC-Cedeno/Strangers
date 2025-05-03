@@ -1,11 +1,9 @@
-/* Reset styles */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-/* Body styling */
 body {
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   background-color: #000;
@@ -36,7 +34,6 @@ body {
   object-fit: cover;
 }
 
-/* Personal Video (picture-in-picture) */
 #my-video {
   background-color: #222;
   position: absolute;
@@ -51,7 +48,6 @@ body {
   box-shadow: 0 0 15px rgba(255, 255, 0, 0.3);
 }
 
-/* Controls */
 .controls {
   position: absolute;
   bottom: 8vh;
@@ -65,7 +61,6 @@ body {
   justify-content: center;
 }
 
-/* Cyber Button Styles */
 .cyber-button {
   padding: 1em 2em;
   border: 3px solid #FFFF00;
@@ -115,6 +110,10 @@ body {
   box-shadow: 0 0 30px #FFFF00;
   transform: scale(1.05);
   text-shadow: none;
+  -webkit-transform: scale(1.05);
+  -moz-transform: scale(1.05);
+  -ms-transform: scale(1.05);
+  -o-transform: scale(1.05);
 }
 
 .cyber-button .glitch-text {
@@ -123,7 +122,6 @@ body {
   animation: glitch 2s infinite;
 }
 
-/* Exit Button Styles */
 .cyber-button.exit {
   border-color: #ff0000;
   color: #ff0000;
@@ -157,7 +155,6 @@ body {
   flex-direction: column;
 }
 
-/* Messages container (scrollable) */
 .chat-holder .messages {
   flex: 1;
   overflow-y: auto;
@@ -165,7 +162,6 @@ body {
   scroll-behavior: smooth;
 }
 
-/* Chat messages */
 .chat-holder .wrapper {
   margin-bottom: 20px;
 }
@@ -177,21 +173,18 @@ body {
   line-height: 1.4;
 }
 
-/* Fixed Input Area */
 .chat-holder .input {
   background-color: #222;
   padding: 15px 20px;
   border-top: 1px solid #FFFF00;
 }
 
-/* Input Container */
 .chat-holder .input-container {
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
-/* Input Field */
 .chat-holder .input input {
   flex: 1;
   padding: 10px 15px;
@@ -203,7 +196,6 @@ body {
   outline: none;
 }
 
-/* Send Button */
 .chat-holder .input button {
   flex-shrink: 0;
   background-color: #FFFF00;
@@ -222,7 +214,6 @@ body {
   transform: scale(1.05);
 }
 
-/* Modal (spinner) */
 .modal {
   position: absolute;
   background-color: rgba(18, 0, 32, 0.6);
@@ -250,7 +241,6 @@ body {
   transform: translateX(-30px);
 }
 
-/* Animations */
 @keyframes pulse {
   0% { opacity: 1; transform: scale(1); }
   50% { opacity: 0.5; transform: scale(0.9); }
