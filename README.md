@@ -1,4 +1,4 @@
-# Stranger
+# Strangers
 
 Este proyecto utiliza las siguientes tecnologías:
 
