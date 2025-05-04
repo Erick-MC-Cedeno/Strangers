@@ -25,6 +25,9 @@ Este proyecto utiliza las siguientes tecnologías:
 ```
 $ git clone https://github.com/Erick-MC-Cedeno/Strangers
 ```
+```
+Strangers
+```
 
 ## Iniciar Frontend
 
