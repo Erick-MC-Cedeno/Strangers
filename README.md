@@ -21,20 +21,25 @@ Este proyecto utiliza las siguientes tecnologías:
 ## Configuración del entorno
 
 
+## Clonar repositorio
+```
+$ git clone https://github.com/Erick-MC-Cedeno/Strangers
+```
+
 ## Iniciar Frontend
 
 ```bash
-cd client
-npm install
-npm run dev
+$ cd client
+$ npm install
+$ npm run dev
 ```
 
 ## Iniciar Backend
 
 ```bash
-cd server
-npm install
-npm start
+$ cd server
+$ npm install
+$ npm start
 ```
 
 
