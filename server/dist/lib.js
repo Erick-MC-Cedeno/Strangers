@@ -18,7 +18,6 @@ function handelStart(roomArr, socket, cb, io) {
         }
     }
     else {
-        // if no available room, create one
         let roomid = (0, uuid_1.v4)();
         socket.join(roomid);
         roomArr.push({
@@ -44,17 +43,11 @@ function handelStart(roomArr, socket, cb, io) {
         }
     }
     function checkAvailableRoom() {
-        var _a, _b;
         for (let i = 0; i < roomArr.length; i++) {
             const currentRoom = roomArr[i];
             // Si hay una sala disponible, y el usuario no es el que ya está en ella
             if (currentRoom.isAvailable && currentRoom.p1.id !== socket.id) {
                 return { is: true, roomid: currentRoom.roomid, room: currentRoom };
-            }
-            // Si el usuario ya está en una sala con otra persona, no emparejarlo
-            if ((currentRoom.p1.id === socket.id && ((_a = currentRoom.p2) === null || _a === void 0 ? void 0 : _a.id)) ||
-                (((_b = currentRoom.p2) === null || _b === void 0 ? void 0 : _b.id) === socket.id && currentRoom.p1.id)) {
-                return { is: false, roomid: "", room: null };
             }
         }
         return { is: false, roomid: '', room: null };

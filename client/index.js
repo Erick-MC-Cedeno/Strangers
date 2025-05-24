@@ -19,6 +19,9 @@ let type = null;
 let roomid = null;
 let socket = null;
 
+// Declarar la variable isCameraOff para evitar errores de referencia
+let isCameraOff = false;
+
 // Inicializar la aplicación:  usa tu url de uso o localhost:8000
 async function init() {
   socket = io('https://upgraded-doodle-jv4j5754g4j3qxqx-8000.app.github.dev');
@@ -55,8 +58,16 @@ async function initMedia() {
     });
     myVideo.srcObject = localStream;
   } catch (err) {
-    console.error('Error accessing media devices:', err);
-    alert('No se pudo acceder a tu cámara/micrófono.');
+    console.warn('No se pudo acceder a la cámara, intentando solo con el micrófono:', err);
+    try {
+      localStream = await navigator.mediaDevices.getUserMedia({
+        audio: true,
+        video: false
+      });
+    } catch (audioErr) {
+      console.error('Error accediendo al micrófono:', audioErr);
+      showNotification('No se pudo acceder a tu cámara/micrófono.');
+    }
   }
 }
 
@@ -300,6 +311,42 @@ function setupUIEvents() {
       }, 2000);
     }
   });
+
+  // Agregar funcionalidad de mute
+  const muteBtn = document.getElementById('muteBtn');
+  let isMuted = false;
+
+  muteBtn.addEventListener('click', () => {
+    if (localStream) {
+      localStream.getAudioTracks().forEach(track => {
+        track.enabled = !isMuted;
+      });
+      isMuted = !isMuted;
+      muteBtn.querySelector('.glitch-text').textContent = isMuted ? 'UNMUTE' : 'MUTE';
+      showNotification(isMuted ? 'Micrófono silenciado' : 'Micrófono activado');
+    }
+  });
+
+  // Corregir la lógica de encendido/apagado de la cámara
+  cameraBtn.addEventListener('click', async () => {
+    if (localStream) {
+      // Verificar permisos de la cámara antes de alternar
+      try {
+        const permissions = await navigator.mediaDevices.getUserMedia({ video: true });
+        if (permissions) {
+          isCameraOff = !isCameraOff; // Cambiar el estado antes de aplicar la lógica
+          localStream.getVideoTracks().forEach(track => {
+            track.enabled = !isCameraOff;
+          });
+          cameraBtn.querySelector('.glitch-text').textContent = isCameraOff ? 'CAMERA ON' : 'CAMERA OFF';
+          showNotification(isCameraOff ? 'Cámara apagada' : 'Cámara encendida');
+        }
+      } catch (error) {
+        showNotification('Error: No se pudo acceder a la cámara.');
+        console.error('Error al verificar permisos de la cámara:', error);
+      }
+    }
+  });
 }
 
 // Crear oferta
@@ -320,24 +367,21 @@ async function createOffer() {
 
 // Función para mostrar notificaciones no bloqueantes
 function showNotification(message) {
-  // Crear elemento de notificación
   const notification = document.createElement('div');
   notification.className = 'notification';
   notification.textContent = message;
   notification.style.position = 'fixed';
-  notification.style.top = '20px';
+  notification.style.top = '50%';
   notification.style.left = '50%';
-  notification.style.transform = 'translateX(-50%)';
+  notification.style.transform = 'translate(-50%, -50%)';
   notification.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
   notification.style.color = 'white';
   notification.style.padding = '10px 20px';
   notification.style.borderRadius = '5px';
   notification.style.zIndex = '9999';
-  
-  // Añadir al DOM
+
   document.body.appendChild(notification);
-  
-  // Eliminar después de 3 segundos
+
   setTimeout(() => {
     notification.style.opacity = '0';
     notification.style.transition = 'opacity 0.5s';

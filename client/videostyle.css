@@ -62,7 +62,7 @@ body {
 }
 
 .cyber-button {
-  padding: 1em 2em;
+  padding: 8px 16px; /* Aumentar ligeramente el tamaño del botón */
   border: 3px solid #FFFF00;
   background: #000;
   color: #FFFF00;
@@ -73,10 +73,10 @@ body {
   position: relative;
   overflow: hidden;
   transition: all 0.4s ease;
-  border-radius: 8px;
+  border-radius: 25px; /* Mantener bordes redondeados pero más grandes */
   text-shadow: 0 0 10px #FFFF00;
   box-shadow: 0 0 15px rgba(255, 255, 0, 0.3);
-  font-size: 1em;
+  font-size: 14px; /* Incrementar el tamaño de la fuente */
 }
 
 .cyber-button::before {
@@ -157,9 +157,13 @@ body {
 
 .chat-holder .messages {
   flex: 1;
-  overflow-y: auto;
+  overflow-y: auto; /* Habilitar desplazamiento vertical */
   padding: 20px;
-  scroll-behavior: smooth;
+  scroll-behavior: smooth; /* Suavizar el desplazamiento */
+  max-height: 80vh; /* Limitar la altura máxima */
+  border: 1px solid #FFFF00; /* Añadir un borde para destacar */
+  border-radius: 10px; /* Bordes redondeados */
+  background-color: #222; /* Fondo oscuro para contraste */
 }
 
 .chat-holder .wrapper {
@@ -171,6 +175,7 @@ body {
   color: #FFFF00;
   font-size: 14px;
   line-height: 1.4;
+  word-wrap: break-word; /* Ajustar texto largo */
 }
 
 .chat-holder .input {
@@ -329,5 +334,23 @@ body {
 
   .chat-holder .input {
     padding: 10px 15px;
+  }
+}
+
+/* Reducir el tamaño del video en pantallas móviles */
+@media only screen and (max-width: 600px) {
+  #video {
+    height: 50vh; /* Reducir la altura del video */
+  }
+
+  #my-video {
+    width: 80px; /* Reducir el tamaño del video local */
+    height: 80px;
+    top: 10px;
+    right: 10px;
+  }
+
+  .video-holder {
+    height: 50vh; /* Reducir la altura de la caja principal */
   }
 }

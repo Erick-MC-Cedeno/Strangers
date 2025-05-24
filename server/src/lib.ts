@@ -2,7 +2,6 @@ import { v4 as uuidv4 } from 'uuid';
 import { GetTypesResult, room } from './types';
 
 export function handelStart(roomArr: Array<room>, socket: any, cb: Function, io: any): void {
-
   // check available rooms
   let availableroom = checkAvailableRoom();
   if (availableroom.is) {
@@ -15,7 +14,6 @@ export function handelStart(roomArr: Array<room>, socket: any, cb: Function, io:
       socket.emit('roomid', availableroom.room.roomid);
     }
   } else {
-    // if no available room, create one
     let roomid = uuidv4();
     socket.join(roomid);
     roomArr.push({
@@ -49,14 +47,6 @@ export function handelStart(roomArr: Array<room>, socket: any, cb: Function, io:
       // Si hay una sala disponible, y el usuario no es el que ya está en ella
       if (currentRoom.isAvailable && currentRoom.p1.id !== socket.id) {
         return { is: true, roomid: currentRoom.roomid, room: currentRoom };
-      }
-
-      // Si el usuario ya está en una sala con otra persona, no emparejarlo
-      if (
-        (currentRoom.p1.id === socket.id && currentRoom.p2?.id) ||
-        (currentRoom.p2?.id === socket.id && currentRoom.p1.id)
-      ) {
-        return { is: false, roomid: "", room: null };
       }
     }
     return { is: false, roomid: '', room: null };
