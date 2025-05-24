@@ -21,7 +21,7 @@ let socket = null;
 
 // Inicializar la aplicación:  usa tu url de uso o localhost:8000
 async function init() {
-  socket = io('https://fantastic-space-disco-x5wvwwxx69qhw6-8000.app.github.dev');
+  socket = io('https://upgraded-doodle-jv4j5754g4j3qxqx-8000.app.github.dev');
   setupSocketEvents();
   await initMedia();
   setupUIEvents();
