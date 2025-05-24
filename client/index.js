@@ -21,7 +21,7 @@ let socket = null;
 
 // Inicializar la aplicación:  usa tu url de uso o localhost:8000
 async function init() {
-  socket = io('https://zany-potato-x795wpw9x4gf6gg5-8000.app.github.dev/');
+  socket = io('https://fantastic-space-disco-x5wvwwxx69qhw6-8000.app.github.dev');
   setupSocketEvents();
   await initMedia();
   setupUIEvents();
@@ -184,6 +184,34 @@ function setupSocketEvents() {
       await peer.addIceCandidate(new RTCIceCandidate(candidate));
     } catch (err) {
       console.error('Error agregando ICE:', err);
+    }
+  });
+
+  // Manejar SDP recibido
+  socket.on('sdp:receive', async ({ sdp }) => {
+    if (!peer) return;
+
+    try {
+      await peer.setRemoteDescription(new RTCSessionDescription(sdp));
+
+      if (sdp.type === 'offer') {
+        const answer = await peer.createAnswer();
+        await peer.setLocalDescription(answer);
+        socket.emit('sdp:send', { sdp: peer.localDescription });
+      }
+    } catch (err) {
+      console.error('Error manejando SDP recibido:', err);
+    }
+  });
+
+  // Manejar ICE recibido
+  socket.on('ice:receive', ({ candidate }) => {
+    if (!peer || !candidate) return;
+
+    try {
+      peer.addIceCandidate(new RTCIceCandidate(candidate));
+    } catch (err) {
+      console.error('Error manejando ICE recibido:', err);
     }
   });
 
