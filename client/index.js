@@ -77,7 +77,11 @@ function setupPeerConnection() {
 
   peer.ontrack = (e) => {
     strangerVideo.srcObject = e.streams[0];
-    strangerVideo.play().catch(e => console.error('Error al reproducir video:', e));
+
+    // Asegurarse de que el video no intente reproducirse si ya está cargando
+    strangerVideo.onloadeddata = () => {
+      strangerVideo.play().catch(err => console.error('Error al reproducir video:', err));
+    };
   };
 
   if (localStream) {
