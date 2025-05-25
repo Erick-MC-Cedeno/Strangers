@@ -19,7 +19,7 @@ let type = null;
 let roomid = null;
 let socket = null;
 let isCameraOff = false;
-let isExiting = false; // NUEVO flag para detectar salida intencional
+let isExiting = false; 
 
 // NUEVA función para detectar móviles
 function isMobile() {
@@ -60,10 +60,10 @@ async function initMedia() {
       audio: {
         echoCancellation: true,
         noiseSuppression: true,
-        autoGainControl: false, // Capturar voz con mayor sensibilidad
+        autoGainControl: false, 
         sampleRate: { ideal: 48000 },
         sampleSize: { ideal: 16 },
-        channelCount: { ideal: 1 } // Usar mono para mayor claridad
+        channelCount: { ideal: 1 } 
       },
       video: {
         width: { ideal: 1280 },
@@ -73,8 +73,8 @@ async function initMedia() {
       }
     });
     myVideo.srcObject = localStream;
-    myVideo.muted = true; // Evitar escuchar el propio audio
-    // Aplicar advanced constraints al video
+    myVideo.muted = true; 
+    
     const videoTrack = localStream.getVideoTracks()[0];
     if (videoTrack) {
       await videoTrack.applyConstraints({
@@ -102,10 +102,10 @@ async function initMedia() {
         myVideo.srcObject = localStream;
         myVideo.muted = true;
       } catch (audioErr) {
-        // Solo log del error, sin notificación
+        
       }
     } else {
-      // Intentar con menor resolución para video
+      
       try {
         localStream = await navigator.mediaDevices.getUserMedia({
           audio: {
@@ -132,7 +132,7 @@ async function initMedia() {
           });
         }
       } catch (retryErr) {
-        // Solo mostrar notificación si no es móvil y no es un error de dispositivo no encontrado
+        
         if (!isExiting && !isMobile() && retryErr.name !== 'NotFoundError' && retryErr.name !== 'DevicesNotFoundError') {
           showNotification('No hay acceso');
         }
@@ -315,7 +315,7 @@ function setupSocketEvents() {
 // Eventos de interfaz
 function setupUIEvents() {
   exitBtn.addEventListener('click', () => {
-    isExiting = true; // Marcar salida intencional
+    isExiting = true; 
     fullCleanup();
     socket.emit('disconnect-me');
     window.location.href = '/';
