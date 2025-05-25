@@ -82,8 +82,7 @@ async function initMedia() {
       });
     }
   } catch (err) {
-    console.warn('Error al obtener video:', err);
-    if (err.name === 'NotAllowedError') {
+    if (err.name === 'NotAllowedError' && !isMobile()) {
       showNotification('Permiso denegado para acceder a la cámara');
       return;
     }
@@ -103,8 +102,7 @@ async function initMedia() {
         myVideo.srcObject = localStream;
         myVideo.muted = true;
       } catch (audioErr) {
-        console.error('Error obteniendo audio:', audioErr);
-        // No se muestra notificación ya que se espera que no haya cámara
+        // Solo log del error, sin notificación
       }
     } else {
       // Intentar con menor resolución para video
@@ -134,8 +132,8 @@ async function initMedia() {
           });
         }
       } catch (retryErr) {
-        console.error('Error reintentando obtener media:', retryErr);
-        if (!isExiting && retryErr.name !== 'NotFoundError' && retryErr.name !== 'DevicesNotFoundError') {
+        // Solo mostrar notificación si no es móvil y no es un error de dispositivo no encontrado
+        if (!isExiting && !isMobile() && retryErr.name !== 'NotFoundError' && retryErr.name !== 'DevicesNotFoundError') {
           showNotification('No hay acceso');
         }
       }
