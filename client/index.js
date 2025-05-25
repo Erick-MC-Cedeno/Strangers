@@ -163,7 +163,7 @@ function setupPeerConnection() {
 
     // Asegurarse de que el video no intente reproducirse si ya está cargando
     strangerVideo.onloadeddata = () => {
-      strangerVideo.play().catch(err => console.error('Error al reproducir video:', err));
+      strangerVideo.play().catch(() => {});
     };
   };
 
@@ -189,9 +189,7 @@ function restartConnection() {
       socket.emit('start', (newType) => {
         type = newType;
       });
-    }).catch(err => {
-      console.error('Error reiniciando la cámara:', err);
-      // Intentar conectar de todos modos
+    }).catch(() => {
       socket.emit('start', (newType) => {
         type = newType;
       });
@@ -202,7 +200,6 @@ function restartConnection() {
 // Configuración de eventos del socket
 function setupSocketEvents() {
   socket.on('connect', () => {
-    console.log('Conectado al servidor');
     socket.emit('start', (personType) => {
       type = personType;
     });
@@ -214,7 +211,6 @@ function setupSocketEvents() {
 
   socket.on('roomid', (id) => {
     roomid = id;
-    console.log('Room ID:', roomid);
   });
 
   socket.on('remote-socket', (partnerId) => {
@@ -260,9 +256,7 @@ function setupSocketEvents() {
         await peer.setLocalDescription(answer);
         socket.emit('sdp:send', { sdp: peer.localDescription });
       }
-    } catch (err) {
-      console.error('Error procesando SDP:', err);
-    }
+    } catch (err) {}
   });
 
   socket.on('ice:reply', async ({ candidate }) => {
@@ -270,9 +264,7 @@ function setupSocketEvents() {
 
     try {
       await peer.addIceCandidate(new RTCIceCandidate(candidate));
-    } catch (err) {
-      console.error('Error agregando ICE:', err);
-    }
+    } catch (err) {}
   });
 
   // Manejar SDP recibido
@@ -287,9 +279,7 @@ function setupSocketEvents() {
         await peer.setLocalDescription(answer);
         socket.emit('sdp:send', { sdp: peer.localDescription });
       }
-    } catch (err) {
-      console.error('Error manejando SDP recibido:', err);
-    }
+    } catch (err) {}
   });
 
   // Manejar ICE recibido
@@ -298,9 +288,7 @@ function setupSocketEvents() {
 
     try {
       peer.addIceCandidate(new RTCIceCandidate(candidate));
-    } catch (err) {
-      console.error('Error manejando ICE recibido:', err);
-    }
+    } catch (err) {}
   });
 
   // Chat
@@ -439,9 +427,7 @@ async function createOffer() {
     });
     await peer.setLocalDescription(offer);
     socket.emit('sdp:send', { sdp: peer.localDescription });
-  } catch (err) {
-    console.error('Error creando la oferta:', err);
-  }
+  } catch (err) {}
 }
 
 // Función para mostrar notificaciones no bloqueantes
