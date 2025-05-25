@@ -16,7 +16,6 @@ body {
   padding: 20px;
 }
 
-/* Video Holder */
 .video-holder {
   position: relative;
   height: 95vh;
@@ -62,7 +61,7 @@ body {
 }
 
 .cyber-button {
-  padding: 8px 16px; /* Aumentar ligeramente el tamaño del botón */
+  padding: 8px 16px; 
   border: 3px solid #FFFF00;
   background: #000;
   color: #FFFF00;
@@ -73,10 +72,10 @@ body {
   position: relative;
   overflow: hidden;
   transition: all 0.4s ease;
-  border-radius: 25px; /* Mantener bordes redondeados pero más grandes */
+  border-radius: 25px; 
   text-shadow: 0 0 10px #FFFF00;
   box-shadow: 0 0 15px rgba(255, 255, 0, 0.3);
-  font-size: 14px; /* Incrementar el tamaño de la fuente */
+  font-size: 14px; 
 }
 
 .cyber-button::before {
@@ -144,7 +143,6 @@ body {
   box-shadow: 0 0 30px #ff0000;
 }
 
-/* Chat Holder */
 .chat-holder {
   height: 95vh;
   margin-left: 20px;
@@ -157,13 +155,13 @@ body {
 
 .chat-holder .messages {
   flex: 1;
-  overflow-y: auto; /* Habilitar desplazamiento vertical */
+  overflow-y: auto; 
   padding: 20px;
-  scroll-behavior: smooth; /* Suavizar el desplazamiento */
-  max-height: 80vh; /* Limitar la altura máxima */
-  border: 1px solid #FFFF00; /* Añadir un borde para destacar */
-  border-radius: 10px; /* Bordes redondeados */
-  background-color: #222; /* Fondo oscuro para contraste */
+  scroll-behavior: smooth; 
+  max-height: 80vh; 
+  border: 1px solid #FFFF00; 
+  border-radius: 10px; 
+  background-color: #222; 
 }
 
 .chat-holder .wrapper {
@@ -175,7 +173,7 @@ body {
   color: #FFFF00;
   font-size: 14px;
   line-height: 1.4;
-  word-wrap: break-word; /* Ajustar texto largo */
+  word-wrap: break-word; 
 }
 
 .chat-holder .input {
@@ -237,8 +235,8 @@ body {
 
 @media only screen and (min-width: 601px) {
   .modal {
-    padding-top: 0;          /* Quitar padding para centrar verticalmente */
-    justify-content: center; /* Centrar los elementos en vertical */
+    padding-top: 0;          
+    justify-content: center; 
   }
 
   .notification {
@@ -379,21 +377,21 @@ body {
   }
 }
 
-/* Reducir el tamaño del video en pantallas móviles */
+
 @media only screen and (max-width: 600px) {
   #video {
-    height: 50vh; /* Reducir la altura del video */
+    height: 50vh; 
   }
 
   #my-video {
-    width: 80px; /* Reducir el tamaño del video local */
+    width: 80px; 
     height: 80px;
     top: 10px;
     right: 10px;
   }
 
   .video-holder {
-    height: 50vh; /* Reducir la altura de la caja principal */
+    height: 50vh; 
   }
 
   .modal {
@@ -404,31 +402,31 @@ body {
     bottom: 0;
     display: flex;
     flex-direction: column;
-    justify-content: center; /* Centrar verticalmente */
-    align-items: center;     /* Centrar horizontalmente */
+    justify-content: center;
+    align-items: center;    
     background-color: rgba(0, 0, 0, 0.8);
     z-index: 9000;
-    padding-top: 0;          /* Eliminar padding superior */
+    padding-top: 0;         
     gap: 20px;
   }
 
   #spinner {
     position: fixed;
-    top: 25%;      /* Se mueve un poquito más arriba */
+    top: 25%;     
     left: 40%;
     transform: translate(-50%, -50%);
     font-size: 16px;
     padding: 12px 20px;
     width: auto;
     max-width: 90%;
-    margin: 0;     /* Se elimina el margen superior */
+    margin: 0;     
     z-index: 9100;
     text-align: center;
   }
 
   .notification {
     position: fixed !important;
-    top: 20% !important;  /* Se coloca en 20% */
+    top: 20% !important;  
     left: 50% !important;
     transform: translate(-50%, -50%) !important;
   }
