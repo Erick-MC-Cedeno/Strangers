@@ -56,18 +56,17 @@ async function initMedia() {
       audio: true,
       video: true
     });
-    myVideo.srcObject = localStream;
-  } catch (err) {
-    console.warn('No se pudo acceder a la cámara, intentando solo con el micrófono:', err);
-    try {
-      localStream = await navigator.mediaDevices.getUserMedia({
-        audio: true,
-        video: false
-      });
-    } catch (audioErr) {
-      console.error('Error accediendo al micrófono:', audioErr);
-      showNotification('No se pudo acceder a tu cámara/micrófono.');
-    }
+    myVideo.srcObject = localStream;    } catch (err) {
+      console.warn('No se pudo acceder a la cámara:', err);
+      try {
+        localStream = await navigator.mediaDevices.getUserMedia({
+          audio: true,
+          video: false
+        });
+      } catch (audioErr) {
+        console.error('Error audio:', audioErr);
+        showNotification('No hay acceso');
+      }
   }
 }
 
@@ -166,8 +165,7 @@ function setupSocketEvents() {
   });
 
   socket.on('disconnected', () => {
-    // Reemplazar el alert con una notificación no bloqueante
-    showNotification('Tu pareja se desconectó. Buscando una nueva...');
+    showNotification('Desconectado. Buscando...');
     fullCleanup();
     restartConnection();
   });
@@ -299,18 +297,16 @@ function setupUIEvents() {
 
   let typingTimeout;
   inputField.addEventListener('input', () => {
-    if (!roomid) return;
+    if (!roomid) return;      const isTyping = inputField.value.length > 0;
+      socket.emit('typing', { roomid, isTyping });
 
-    const isTyping = inputField.value.length > 0;
-    socket.emit('typing', { roomid, isTyping });
-
-    clearTimeout(typingTimeout);
-    if (isTyping) {
-      typingTimeout = setTimeout(() => {
-        socket.emit('typing', { roomid, isTyping: false });
-      }, 2000);
-    }
-  });
+      clearTimeout(typingTimeout);
+      if (isTyping) {
+        typingTimeout = setTimeout(() => {
+          socket.emit('typing', { roomid, isTyping: false });
+        }, 2000);
+      }
+    });
 
   // Agregar funcionalidad de mute
   const muteBtn = document.getElementById('muteBtn');
@@ -322,8 +318,8 @@ function setupUIEvents() {
         track.enabled = !isMuted;
       });
       isMuted = !isMuted;
-      muteBtn.querySelector('.glitch-text').textContent = isMuted ? 'UNMUTE' : 'MUTE';
-      showNotification(isMuted ? 'Micrófono silenciado' : 'Micrófono activado');
+      muteBtn.querySelector('.glitch-text').textContent = isMuted ? 'ON' : 'OFF';
+      showNotification(isMuted ? 'Audio OFF' : 'Audio ON');
     }
   });
 
@@ -334,16 +330,16 @@ function setupUIEvents() {
       try {
         const permissions = await navigator.mediaDevices.getUserMedia({ video: true });
         if (permissions) {
-          isCameraOff = !isCameraOff; // Cambiar el estado antes de aplicar la lógica
+          isCameraOff = !isCameraOff;
           localStream.getVideoTracks().forEach(track => {
             track.enabled = !isCameraOff;
           });
-          cameraBtn.querySelector('.glitch-text').textContent = isCameraOff ? 'CAMERA ON' : 'CAMERA OFF';
-          showNotification(isCameraOff ? 'Cámara apagada' : 'Cámara encendida');
+          cameraBtn.querySelector('.glitch-text').textContent = isCameraOff ? 'ON' : 'OFF';
+          showNotification(isCameraOff ? 'Video OFF' : 'Video ON');
         }
       } catch (error) {
-        showNotification('Error: No se pudo acceder a la cámara.');
-        console.error('Error al verificar permisos de la cámara:', error);
+        showNotification('No hay acceso');
+        console.error('Error cámara:', error);
       }
     }
   });

@@ -220,30 +220,72 @@ body {
 }
 
 .modal {
-  position: absolute;
-  background-color: rgba(18, 0, 32, 0.6);
-  height: 100vh;
-  width: 100vw;
-  z-index: 100;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   display: flex;
-  justify-content: center;
-  align-items: center;
   flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  z-index: 2000;
+  background-color: rgba(0, 0, 0, 0.7);
+  padding-top: 20vh;
+  gap: 20px;
 }
 
-.modal #spinner {
+@media only screen and (min-width: 601px) {
+  .modal {
+    padding-top: 0;          /* Quitar padding para centrar verticalmente */
+    justify-content: center; /* Centrar los elementos en vertical */
+  }
+
+  .notification {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+}
+
+#spinner {
+  position: relative;
   font-size: 16px;
   color: #FFFF00;
   font-weight: bold;
-  width: 200px;
-  height: 200px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border-radius: 50%;
-  animation: pulse 1.5s ease-in-out infinite;
-  margin-top: -80px;
-  transform: translateX(-30px);
+  text-align: center;
+  padding: 12px 24px;
+  border: 2px solid #FFFF00;
+  border-radius: 8px;
+  background-color: rgba(0, 0, 0, 0.9);
+  box-shadow: 0 0 15px rgba(255, 255, 0, 0.5);
+  animation: pulse 2s infinite;
+  white-space: nowrap;
+}
+
+.notification {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(0, 0, 0, 0.95);
+    color: #FFFF00;
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: 2px solid #FFFF00;
+    box-shadow: 0 0 15px rgba(255, 255, 0, 0.7);
+    font-size: 14px;
+    font-weight: bold;
+    z-index: 3000;
+    animation: fadeIn 0.5s ease-in-out, fadeOut 0.5s ease-in-out 4.5s;
+    text-align: center;
+    min-width: 120px;
+    max-width: 300px;
+    width: auto;
+    white-space: normal;
+    word-wrap: break-word;
+    pointer-events: none;
 }
 
 @keyframes pulse {
@@ -352,5 +394,46 @@ body {
 
   .video-holder {
     height: 50vh; /* Reducir la altura de la caja principal */
+  }
+
+  .modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Centrar verticalmente */
+    align-items: center;     /* Centrar horizontalmente */
+    background-color: rgba(0, 0, 0, 0.8);
+    z-index: 9000;
+    padding-top: 0;          /* Eliminar padding superior */
+    gap: 20px;
+  }
+
+  #spinner {
+    position: fixed;
+    top: 25%;      /* Se mueve un poquito más arriba */
+    left: 40%;
+    transform: translate(-50%, -50%);
+    font-size: 16px;
+    padding: 12px 20px;
+    width: auto;
+    max-width: 90%;
+    margin: 0;     /* Se elimina el margen superior */
+    z-index: 9100;
+    text-align: center;
+  }
+
+  .notification {
+    position: fixed !important;
+    top: 20% !important;  /* Se coloca en 20% */
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+  }
+
+  .controls {
+    z-index: 8000;
   }
 }
