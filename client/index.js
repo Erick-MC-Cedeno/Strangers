@@ -18,9 +18,13 @@ let remoteSocket = null;
 let type = null;
 let roomid = null;
 let socket = null;
-
-// Declarar la variable isCameraOff para evitar errores de referencia
 let isCameraOff = false;
+let isExiting = false; // NUEVO flag para detectar salida intencional
+
+// NUEVA función para detectar móviles
+function isMobile() {
+  return /Mobi|Android/i.test(navigator.userAgent);
+}
 
 // Inicializar la aplicación:  usa tu url de uso o localhost:8000
 async function init() {
@@ -53,20 +57,89 @@ function fullCleanup() {
 async function initMedia() {
   try {
     localStream = await navigator.mediaDevices.getUserMedia({
-      audio: true,
-      video: true
+      audio: {
+        echoCancellation: true,
+        noiseSuppression: true,
+        autoGainControl: false, // Capturar voz con mayor sensibilidad
+        sampleRate: { ideal: 48000 },
+        sampleSize: { ideal: 16 },
+        channelCount: { ideal: 1 } // Usar mono para mayor claridad
+      },
+      video: {
+        width: { ideal: 1280 },
+        height: { ideal: 720 },
+        frameRate: { ideal: 30 },
+        facingMode: "user"
+      }
     });
-    myVideo.srcObject = localStream;    } catch (err) {
-      console.warn('No se pudo acceder a la cámara:', err);
+    myVideo.srcObject = localStream;
+    myVideo.muted = true; // Evitar escuchar el propio audio
+    // Aplicar advanced constraints al video
+    const videoTrack = localStream.getVideoTracks()[0];
+    if (videoTrack) {
+      await videoTrack.applyConstraints({
+        advanced: [{ brightness: 0.5, contrast: 1.0, saturation: 1.2 }]
+      });
+    }
+  } catch (err) {
+    console.warn('Error al obtener video:', err);
+    if (err.name === 'NotAllowedError') {
+      showNotification('Permiso denegado para acceder a la cámara');
+      return;
+    }
+    if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
       try {
         localStream = await navigator.mediaDevices.getUserMedia({
-          audio: true,
+          audio: {
+            echoCancellation: true,
+            noiseSuppression: true,
+            autoGainControl: false,
+            sampleRate: { ideal: 48000 },
+            sampleSize: { ideal: 16 },
+            channelCount: { ideal: 1 }
+          },
           video: false
         });
+        myVideo.srcObject = localStream;
+        myVideo.muted = true;
       } catch (audioErr) {
-        console.error('Error audio:', audioErr);
-        showNotification('No hay acceso');
+        console.error('Error obteniendo audio:', audioErr);
+        // No se muestra notificación ya que se espera que no haya cámara
       }
+    } else {
+      // Intentar con menor resolución para video
+      try {
+        localStream = await navigator.mediaDevices.getUserMedia({
+          audio: {
+            echoCancellation: true,
+            noiseSuppression: true,
+            autoGainControl: false,
+            sampleRate: { ideal: 48000 },
+            sampleSize: { ideal: 16 },
+            channelCount: { ideal: 1 }
+          },
+          video: {
+            width: { ideal: 640 },
+            height: { ideal: 360 },
+            frameRate: { ideal: 20 },
+            facingMode: "user"
+          }
+        });
+        myVideo.srcObject = localStream;
+        myVideo.muted = true;
+        const videoTrack = localStream.getVideoTracks()[0];
+        if (videoTrack) {
+          await videoTrack.applyConstraints({
+            advanced: [{ brightness: 0.5, contrast: 1.0, saturation: 1.2 }]
+          });
+        }
+      } catch (retryErr) {
+        console.error('Error reintentando obtener media:', retryErr);
+        if (!isExiting && retryErr.name !== 'NotFoundError' && retryErr.name !== 'DevicesNotFoundError') {
+          showNotification('No hay acceso');
+        }
+      }
+    }
   }
 }
 
@@ -165,9 +238,11 @@ function setupSocketEvents() {
   });
 
   socket.on('disconnected', () => {
-    showNotification('Desconectado. Buscando...');
-    fullCleanup();
-    restartConnection();
+    if (!isExiting) {
+      showNotification('Desconectado. Buscando...');
+      fullCleanup();
+      restartConnection();
+    }
   });
 
   socket.on('disconnect-confirm', () => {
@@ -254,6 +329,7 @@ function setupSocketEvents() {
 // Eventos de interfaz
 function setupUIEvents() {
   exitBtn.addEventListener('click', () => {
+    isExiting = true; // Marcar salida intencional
     fullCleanup();
     socket.emit('disconnect-me');
     window.location.href = '/';
@@ -298,35 +374,39 @@ function setupUIEvents() {
   let typingTimeout;
   inputField.addEventListener('input', () => {
     if (!roomid) return;      const isTyping = inputField.value.length > 0;
-      socket.emit('typing', { roomid, isTyping });
+    socket.emit('typing', { roomid, isTyping });
 
-      clearTimeout(typingTimeout);
-      if (isTyping) {
-        typingTimeout = setTimeout(() => {
-          socket.emit('typing', { roomid, isTyping: false });
-        }, 2000);
-      }
-    });
-
-  // Agregar funcionalidad de mute
-  const muteBtn = document.getElementById('muteBtn');
-  let isMuted = false;
-
-  muteBtn.addEventListener('click', () => {
-    if (localStream) {
-      localStream.getAudioTracks().forEach(track => {
-        track.enabled = !isMuted;
-      });
-      isMuted = !isMuted;
-      muteBtn.querySelector('.glitch-text').textContent = isMuted ? 'ON' : 'OFF';
-      showNotification(isMuted ? 'Audio OFF' : 'Audio ON');
+    clearTimeout(typingTimeout);
+    if (isTyping) {
+      typingTimeout = setTimeout(() => {
+        socket.emit('typing', { roomid, isTyping: false });
+      }, 2000);
     }
   });
+
+  // Agregar funcionalidad de mute mejorada
+  const muteBtn = document.getElementById('muteBtn');
+  let isMuted = false;
+  if (muteBtn) {
+    muteBtn.addEventListener('click', () => {
+      if (localStream && localStream.getAudioTracks().length > 0) {
+        isMuted = !isMuted;
+        // Alternar habilitación de las pistas de audio
+        localStream.getAudioTracks().forEach(track => {
+          track.enabled = !isMuted;
+        });
+        // Actualizar el texto correctamente: muestra "OFF" si está muteado
+        muteBtn.querySelector('.glitch-text').textContent = isMuted ? 'OFF' : 'ON';
+        showNotification(isMuted ? 'Audio OFF' : 'Audio ON');
+      } else {
+        showNotification('No hay pista de audio');
+      }
+    });
+  }
 
   // Corregir la lógica de encendido/apagado de la cámara
   cameraBtn.addEventListener('click', async () => {
     if (localStream) {
-      // Verificar permisos de la cámara antes de alternar
       try {
         const permissions = await navigator.mediaDevices.getUserMedia({ video: true });
         if (permissions) {
@@ -338,7 +418,10 @@ function setupUIEvents() {
           showNotification(isCameraOff ? 'Video OFF' : 'Video ON');
         }
       } catch (error) {
-        showNotification('No hay acceso');
+        // Mostrar notificación solo si no se está saliendo y no es un dispositivo móvil
+        if (!isExiting && !isMobile()) {
+          showNotification('No hay acceso');
+        }
         console.error('Error cámara:', error);
       }
     }
